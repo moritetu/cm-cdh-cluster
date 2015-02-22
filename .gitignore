@@ -1,0 +1,10 @@
+~*
+.vagrant/
+vendor/
+.bundle/
+disks/*
+log/*
+/Gemfile.lock
+!.gitkeep
+*.pid
+.#*
