@@ -7,18 +7,25 @@ $vm_box = "centos65-x86_64"
 
 $attach_disk = proc {|id, vb|
   disk_image = "./disks/#{id.to_s}.dvi"
+  storage_attach_command = [
+    'storageattach', :id,
+    '--storagectl', 'SATA',
+    '--port', 1,
+    '--device', 0,
+    '--type', 'hdd',
+    '--medium', disk_image]
+
   unless File.exist?(disk_image)
-    vb.customize ["createhd",
-                  "--filename", disk_image,
+    vb.customize ['createhd',
+                  '--filename', disk_image,
                   # 15G
-                  "--size", 15 * 1024]
+                  '--size', 15 * 1024]
+
+    vb.customize storage_attach_command
+  else
+    vb.customize ['internalcommands', 'sethduuid', disk_image]
+    vb.customize storage_attach_command
   end
-  vb.customize ['storageattach', :id,
-                '--storagectl', 'SATA',
-                '--port', 1,
-                '--device', 0,
-                '--type', 'hdd',
-                '--medium', disk_image]
 }
 
 Vagrant.configure("2") do |config|
@@ -34,7 +41,7 @@ Vagrant.configure("2") do |config|
   config.hostmanager.ignore_private_ip = false
 
   # Cluster node parameters
-  MASTER_NODE_NUM  = 2
+  MASTER_NODE_NUM  = 1
   SLAVE_NODE_NUM   = 3
 
   # Master nodes

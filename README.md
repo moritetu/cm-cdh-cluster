@@ -11,7 +11,7 @@ $ vagrant up
 
 ### Cluster
 
-Two master nodes and three slave nodes will run.
+A master node and three slave nodes will run.
 
 #### OS
 
@@ -24,14 +24,14 @@ Master nodes have 4G, slave nodes have 2G.
 #### HostName
 
 ```
-master: hadoop1[1-2]
+master: hadoop11
 slave : hadoop1[1-3]
 ```
 
 #### Network
 
 ```
-master: 192.168.10.10[1-2]
+master: 192.168.10.101
 slave : 192.168.10.20[1-3]
 ```
 
