@@ -5,27 +5,22 @@
 # The used box name
 $vm_box = "centos65-x86_64"
 
-$attach_disk = proc {|id, vb|
-  disk_image = "./disks/#{id.to_s}.dvi"
-  storage_attach_command = [
-    'storageattach', :id,
+$attach_disk = proc {|vb|
+  disk_image = "./disks/#{vb.name}.dvi"
+  unless File.exist?(disk_image)
+    vb.customize ['createhd',
+      '--filename', disk_image,
+      # 15G
+      '--size', 15 * 1024]
+  end
+  vb.customize ['storageattach', vb.name,
     '--storagectl', 'SATA',
     '--port', 1,
     '--device', 0,
     '--type', 'hdd',
-    '--medium', disk_image]
-
-  unless File.exist?(disk_image)
-    vb.customize ['createhd',
-                  '--filename', disk_image,
-                  # 15G
-                  '--size', 15 * 1024]
-
-    vb.customize storage_attach_command
-  else
-    vb.customize ['internalcommands', 'sethduuid', disk_image]
-    vb.customize storage_attach_command
-  end
+    '--medium', disk_image,
+    '--setuuid', ''
+  ]
 }
 
 Vagrant.configure("2") do |config|
@@ -51,9 +46,9 @@ Vagrant.configure("2") do |config|
       # See https://gist.github.com/leifg/4713995
       #     https://www.virtualbox.org/manual/ch08.html#vboxmanage-createvdi
       master.vm.provider :virtualbox do |v|
-        $attach_disk.call("master#{i}", v)
         v.name = "hadoop-master#{i}"
         v.customize ["modifyvm", :id, "--memory", "4096"]
+        $attach_disk.call(v)
       end
       master.vm.network :private_network, ip: "192.168.10.10#{i}"
       master.vm.hostname = "hadoop1#{i}"
@@ -70,9 +65,9 @@ Vagrant.configure("2") do |config|
     config.vm.define "slave#{i}" do |slave|
       slave.vm.box = $vm_box
       slave.vm.provider :virtualbox do |v|
-        $attach_disk.call("slave#{i}", v)
         v.name = "hadoop-slave#{i}"
         v.customize ["modifyvm", :id, "--memory", "2048"]
+        $attach_disk.call(v)
       end
       slave.vm.network :private_network, ip: "192.168.10.2#{sprintf('%02d', i)}"
       slave.vm.hostname = "hadoop2#{i}"
