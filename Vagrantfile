@@ -19,7 +19,6 @@ $attach_disk = proc {|vb|
     '--device', 0,
     '--type', 'hdd',
     '--medium', disk_image,
-    '--setuuid', ''
   ]
 }
 
