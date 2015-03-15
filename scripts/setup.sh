@@ -37,3 +37,6 @@ EOF
 
 # Add user vagrant to group wheel
 echo 'vagrant ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Add locale
+localedef -f UTF-8 -i ja_JP ja_JP.utf8

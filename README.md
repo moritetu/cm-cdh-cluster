@@ -4,45 +4,53 @@ You can setup Hadoop Cluster(CDH) with Cloudera Manager 5 on VirtualBox quickly.
 
 ## Setup
 
+At first, please download and install ChefDK from the following site.
+
 ```
-$ vagrant plugin install vagrant-hostmanager
+https://downloads.chef.io/chef-dk/
+```
+
+Next, install some vagrant plugins and boot virtual machines with vagrant.
+
+```
+$ vagrant plugin install vagrant-hostmanager vagrant-omnibus vagrant-berkshelf
 $ vagrant up
 ```
 
-### Cluster
+## Cluster
 
 A master node and three slave nodes will run.
 
-#### OS
+### OS
 
 CentOS 6.5 x86_64
 
-#### Memory
+### Memory
 
 Master nodes have 4G, slave nodes have 2G.
 
-#### HostName
+### HostName
 
 ```
 master: hadoop11
 slave : hadoop1[1-3]
 ```
 
-#### Network
+### Network
 
 ```
 master: 192.168.10.101
 slave : 192.168.10.20[1-3]
 ```
 
-### Fluentd
+## Fluentd
 
 ```
 $ bundle install --path=vendor/bundle
 $ bundle exec rake fluent:start
 ```
 
-#### Emit Log
+### Emit Log
 
 Execute the following command, then you will see data at `/tmp/access_log` on HDFS in a few minutes.
 
@@ -50,7 +58,7 @@ Execute the following command, then you will see data at `/tmp/access_log` on HD
 $ bundle exec rake fluent:cat
 ```
 
-#### WebHDFS Append Enabled
+### WebHDFS Append Enabled
 
 To allow to append to a file by fluend, you need to add the following setting to `hdfs-site.xml` safety valve.
 
@@ -66,7 +74,7 @@ To allow to append to a file by fluend, you need to add the following setting to
 </property>
 ```
 
-### Hive
+## Hive and Impala
 
 You can create a table in the default database by executing `/vagrant/scripts/create-table-accesslog.sh`
 
@@ -74,17 +82,18 @@ You can create a table in the default database by executing `/vagrant/scripts/cr
 $ /vagrant/scripts/create-table-accesslog.sh
 ```
 
-#### Run Query
+### Run Query
+
+If you install Hive and Impala with Cloudera Manager, you can run the following query;
+
+**Hive**
 
 ```
-$ sudo -u hive hive -e "
-SELECT log.agent, count(*) FROM access_log
-  LATERAL VIEW json_tuple(
-    access_log.message,
-    'host',
-    'path',
-    'agent'
-  ) log as host, path, agent
-GROUP BY log.agent;
-"
+$ sudo -u hive hive -e "select agent, count(*) from access_log group by agent;"
+```
+
+**Impala**
+
+```
+$ impala-shell -i hadoop21 -q "invalidate metadata access_log;select agent, count(*) from access_log group by agent;"
 ```
