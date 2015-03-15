@@ -5,6 +5,7 @@ vendor/
 disks/*
 log/*
 /Gemfile.lock
+/Berksfile.lock
 !.gitkeep
 *.pid
 .#*

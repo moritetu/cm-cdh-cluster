@@ -17,6 +17,8 @@ $ vagrant plugin install vagrant-hostmanager vagrant-omnibus vagrant-berkshelf
 $ vagrant up
 ```
 
+After setup, access to `http:://hadoop11:7180/`, then you will see the login page of cloudera manager.
+
 ## Cluster
 
 A master node and three slave nodes will run.
