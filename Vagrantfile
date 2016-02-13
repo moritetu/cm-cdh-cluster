@@ -24,6 +24,8 @@ $attach_disk = proc {|vb|
   ]
 }
 
+ATTACH_DISK = false
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Define base image
@@ -54,12 +56,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     chef.add_recipe "vim"
     chef.add_recipe "git"
     chef.add_recipe "ruby_build"
-    chef.add_recipe "rbenv::system"
+    chef.add_recipe "ruby_rbenv::system"
 
     # # Attributes for recipes
-    install_ruby_version = "2.1.5"
+    install_ruby_version = "2.3.0"
     chef.json = {
-      "rbenv" => {
+      "ruby_rbenv" => {
         "global" => install_ruby_version,
         "rubies" => [install_ruby_version],
         # https://github.com/fnichol/chef-rbenv/issues/98
@@ -73,7 +75,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # Cluster node parameters
-  MASTER_NODE_NUM  = 1
+  MASTER_NODE_NUM  = 3
   SLAVE_NODE_NUM   = 3
 
   # Master nodes
@@ -84,8 +86,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #     https://www.virtualbox.org/manual/ch08.html#vboxmanage-createvdi
       master.vm.provider :virtualbox do |v|
         v.name = "hadoop-master#{i}"
-        v.customize ["modifyvm", :id, "--memory", "4096"]
-        $attach_disk.call(v)
+        v.customize ["modifyvm", :id, "--memory", "2048"]
+        $attach_disk.call(v) if ATTACH_DISK
       end
       master.vm.network :private_network, ip: "192.168.10.10#{i}"
       master.vm.hostname = "hadoop1#{i}"
@@ -109,7 +111,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       slave.vm.provider :virtualbox do |v|
         v.name = "hadoop-slave#{i}"
         v.customize ["modifyvm", :id, "--memory", "2048"]
-        $attach_disk.call(v)
+        $attach_disk.call(v) if ATTACH_DISK
       end
       slave.vm.network :private_network, ip: "192.168.10.2#{sprintf('%02d', i)}"
       slave.vm.hostname = "hadoop2#{i}"
